@@ -12,7 +12,7 @@ class Boiler
     result = []
     count = spare_parts.count
     references.each do |ref|
-      if ref.sheet == 'Зборка' or ref.sheet == 'ГПП'
+      if ref.sheet == 'Зборка'
         Types.each do |type|
           boiler = self.new count
           boiler.id = ref.id
