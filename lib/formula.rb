@@ -38,6 +38,12 @@ class Formula
   end
 
   def update_vector_for_lexem(hash, factor, lexem)
+    match = /(((\d+,)?\d+)\*)?(.*)/.match lexem
+    if match[1]
+      number = match[2].sub(',','.')
+      factor *= number.to_f
+    end
+    lexem = match[4]
     ref = lexem_to_reference lexem
     id = @references.get_id(ref)
     hash[id]||=0
