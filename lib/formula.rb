@@ -1,33 +1,47 @@
 class Formula
 
-  INNER_PARENTHESIS_REGEX=/^([^\(]*)\((.*)\)([^\)]*)$/ #Starts with anything but (, then ( then anything then )
+  INNER_PARENTHESIS_REGEX=/((\d+)\*)?(-?)(\(.*\))/ #search for 2*(...) or +(...) or -(...)
   # then ends with anything but )
 
   def initialize(args={})
     @references = args[:references]
-    @size = args[:boilers].count
   end
 
-  def translate(expression)
-    expression=expression[2..-1] #Removing #=
-    sums = expression.split
+  def translate(exp)
+    exp=exp[2..-1] #Removing #=
+    hash = {}
+    factor = 1
+    expression_to_vector(hash,factor,exp)
   end
 
-  def expression_to_vector(vector, exp, factor)
-    data = exp.split('*')
-    if data.count is 2
-      new_factor = data[0].to_f * factor
-      new_exp = data[1]
-    else
-      new_exp = data[0]
-    end
-    new_exp=new_exp[1..-2] if new_exp[0] == '(' #canonical view, no parenthesis
+  def expression_to_vector(hash, factor, exp)
+    exp=new[1..-2] if exp[0] == '(' #canonical view, no parenthesis
+    return if exp='' or exp.nil?
     inner_exp_match = INNER_PARENTHESIS_REGEX.match new_exp
     if inner_exp_match
-      new_exp=inner_exp_match[1] + inner_exp_match[3]
-      post_processing = inner_exp_match[2]
+      post_processing_exp=inner_exp_match[4]
+      post_processing_factor = inner_exp_match[2].nil? ? factor : factor * inner_exp_match[2].to_i
+      expression_to_vector(hash, post_processing_factor, post_processing_exp)
+      exp = inner_exp_match.pre_match + inner_exp_match.post_match
+    end
+    lexems = exp.split('+')
+    lexems.each do |lexem|
+      update_vector_for_lexem(hash, factor, lexem)
     end
 
+  end
+
+  def lexem_to_reference(hash)
+    match = /\!\w+]/.match lexem
+    raise "Undefined lexem structure #{lexem}" unless match.pre_match and match.post_match
+    match.pre_match +' ' +match.post_match
+  end
+
+  def update_vector_for_lexem(hash, factor, lexem)
+    ref = lexem_to_reference lexem
+    id = @references.get_id(ref)
+    hash[id]||=0
+    hash[id]+=factor
   end
 
 end
