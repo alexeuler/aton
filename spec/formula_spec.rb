@@ -75,6 +75,17 @@ describe Formula do
     expect(hash).to eq(expected)
   end
 
+  it 'Recursive formula', focus: true do
+    form = '#=Тепл!T10'
+    hash = App::Formula.translate(form)
+    expected = {
+        'Vektor2&K'=> 1,
+        'Vektor3&K'=> 5,
+        'Vektor4&K'=> 7,
+        'Vektor5&K'=> 2,
+    }
+    expect(hash).to eq(expected)
+  end
 
 
 end
