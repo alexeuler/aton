@@ -51,6 +51,30 @@ describe Formula do
     expect(hash).to eq(expected)
   end
 
+  it 'Nested simple formula with float' do
+    form = '#=2*(Зборка!O95+2,5*Зборка!O96+Зборка!O97+Зборка!O98)'
+    hash = App::Formula.translate(form)
+    expected = {
+        'Vektor2'=> 2,
+        'Vektor3'=> 5,
+        'Vektor4'=> 2,
+        'Vektor5'=> 2,
+    }
+    expect(hash).to eq(expected)
+  end
+
+  it 'Nested formula with float' do
+    form = '#=Зборка!O95+2*(2,5*(Зборка!O96+Зборка!O97)+Зборка!O97+Зборка!O98)'
+    hash = App::Formula.translate(form)
+    expected = {
+        'Vektor2'=> 1,
+        'Vektor3'=> 5,
+        'Vektor4'=> 7,
+        'Vektor5'=> 2,
+    }
+    expect(hash).to eq(expected)
+  end
+
 
 
 end

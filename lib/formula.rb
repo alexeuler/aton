@@ -1,6 +1,6 @@
 class Formula
 
-  INNER_PARENTHESIS_REGEX=/((\d+)\*)?(-?)(\(.*\))/ #search for 2*(...) or +(...) or -(...)
+  INNER_PARENTHESIS_REGEX=/(((\d+,)?\d+)\*)?(-?)(\(.*\))/ #search for 2*(...) or +(...) or -(...)
   # then ends with anything but )
 
   def initialize(args={})
@@ -10,7 +10,7 @@ class Formula
   def translate(exp)
     exp=exp[2..-1] #Removing #=
     hash = {}
-    factor = 1
+    factor = 1.0
     expression_to_vector(hash,factor,exp)
   end
 
@@ -19,20 +19,21 @@ class Formula
     return if exp=='' or exp.nil?
     inner_exp_match = INNER_PARENTHESIS_REGEX.match exp
     if inner_exp_match
-      post_processing_exp=inner_exp_match[4]
-      post_processing_factor = inner_exp_match[2].nil? ? factor : factor * inner_exp_match[2].to_i
+      post_processing_exp=inner_exp_match[5]
+      post_processing_factor = inner_exp_match[2].nil? ? factor : factor * inner_exp_match[2].sub(',','.').to_f
       expression_to_vector(hash, post_processing_factor, post_processing_exp)
       exp = inner_exp_match.pre_match + inner_exp_match.post_match
     end
     lexems = exp.split('+')
     lexems.each do |lexem|
-      update_vector_for_lexem(hash, factor, lexem)
+      update_vector_for_lexem(hash, factor, lexem) unless lexem.empty?
     end
     hash
   end
 
   def lexem_to_reference(lexem)
     match = /!\D+/.match lexem
+    raise "Undefined lexem structure #{lexem}" unless match
     raise "Undefined lexem structure #{lexem}" unless match.pre_match and match.post_match
     match.pre_match+'!'+match.post_match
   end
