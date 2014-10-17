@@ -24,4 +24,8 @@ class SparePart
     result
   end
 
+  def get_boiler_vector
+
+  end
+
 end
