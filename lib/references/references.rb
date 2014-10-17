@@ -23,7 +23,7 @@ class References
     end
   end
 
-  def self.get_id(formula)
+  def get_id(formula)
     self.hash[formula]
   end
 

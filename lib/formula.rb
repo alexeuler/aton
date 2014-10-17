@@ -15,9 +15,9 @@ class Formula
   end
 
   def expression_to_vector(hash, factor, exp)
-    exp=new[1..-2] if exp[0] == '(' #canonical view, no parenthesis
-    return if exp='' or exp.nil?
-    inner_exp_match = INNER_PARENTHESIS_REGEX.match new_exp
+    exp=exp[1..-2] if exp[0] == '(' #canonical view, no parenthesis
+    return if exp=='' or exp.nil?
+    inner_exp_match = INNER_PARENTHESIS_REGEX.match exp
     if inner_exp_match
       post_processing_exp=inner_exp_match[4]
       post_processing_factor = inner_exp_match[2].nil? ? factor : factor * inner_exp_match[2].to_i
@@ -28,13 +28,13 @@ class Formula
     lexems.each do |lexem|
       update_vector_for_lexem(hash, factor, lexem)
     end
-
+    hash
   end
 
-  def lexem_to_reference(hash)
-    match = /\!\w+]/.match lexem
+  def lexem_to_reference(lexem)
+    match = /!\D+/.match lexem
     raise "Undefined lexem structure #{lexem}" unless match.pre_match and match.post_match
-    match.pre_match +' ' +match.post_match
+    match.pre_match+'!'+match.post_match
   end
 
   def update_vector_for_lexem(hash, factor, lexem)
