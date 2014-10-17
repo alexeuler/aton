@@ -2,20 +2,29 @@ require_relative 'reference'
 
 class References
 
-  attr_reader :data
+  include Enumerable
+  attr_reader :hash, :data
 
   def initialize(source)
-    @data = {}
+    @hash = {}
+    @data = []
     File.open(source, 'r') do |f|
       f.each_line do |line|
         reference = Reference.read(line)
-        @data[reference.formula] = reference.id
+        @hash[reference.formula] = reference.id
+        @data << reference
       end
     end
   end
 
+  def each(&block)
+    @data.each do |tuple|
+      block.call(tuple)
+    end
+  end
+
   def self.get_id(formula)
-    data[formula]
+    self.hash[formula]
   end
 
 end
