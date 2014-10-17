@@ -14,7 +14,7 @@ class Formula
     hash = {}
     factor = 1.0
     types = form_types(exp)
-    expression_to_vector(hash,factor,exp, types)
+    expression_to_vector(hash, factor, exp, types)
   end
 
   def form_types(exp)
@@ -41,7 +41,7 @@ class Formula
     inner_exp_match = INNER_PARENTHESIS_REGEX.match exp
     if inner_exp_match
       post_processing_exp=inner_exp_match[5]
-      post_processing_factor = inner_exp_match[2].nil? ? factor : factor * inner_exp_match[2].sub(',','.').to_f
+      post_processing_factor = inner_exp_match[2].nil? ? factor : factor * inner_exp_match[2].sub(',', '.').to_f
       expression_to_vector(hash, post_processing_factor, post_processing_exp, types)
       exp = inner_exp_match.pre_match + inner_exp_match.post_match
     end
@@ -60,18 +60,29 @@ class Formula
   end
 
   def update_vector_for_lexem(hash, factor, lexem, types)
+    # checking if there's factor before sum e.g. 2*Зборка!O1
     match = /(((\d+,)?\d+)\*)?(.*)/.match lexem
     if match[1]
-      number = match[2].sub(',','.')
+      number = match[2].sub(',', '.')
       factor *= number.to_f
     end
     lexem = match[4]
-    ref = lexem_to_reference lexem
-    types.each do |type|
-      id = @references.get_id(ref) + "&#{type}"
-      hash[id]||=0
-      hash[id]+=factor
+    if /Зборка/.match lexem
+      ref = lexem_to_reference lexem
+      types.each do |type|
+        id = @references.get_id(ref) + "&#{type}"
+        hash[id]||=0
+        hash[id]+=factor
+      end
+    else
+      reference = App::References.get_id(lexem)
+      formula = App::Heaters.get_formula(reference)
+      new_hash = translate formula
+      new_hash.each_pair do |key,value|
+        hash[key]||=0
+        hash[key]+=value
+      end
     end
-  end
 
+  end
 end
