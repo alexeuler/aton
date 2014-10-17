@@ -1,0 +1,3 @@
+class Boiler
+
+end

@@ -13,7 +13,7 @@ class SparePart
     result
   end
 
-  def self.read_from_file(source)
+  def self.load(source)
     result = []
     File.open(source, "r") do |f|
       f.each_line do |line|
